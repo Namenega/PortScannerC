@@ -9,6 +9,16 @@
 #define MAX_PORT 65535
 #define MIN_PORT 1
 
+/*
+ * --------------
+ * Usage function
+ * --------------
+ *
+ * Parameter:
+ * - @executable: [char *] - executable file
+ *
+ * Print out the usage of the program
+ */
 void usage(char *executable)
 {
 	printf("Usage of port scanner:\n");
@@ -16,6 +26,17 @@ void usage(char *executable)
 	printf("\n\tportscanner [-h help]");
 }
 
+/*
+ * -------------------
+ * Parse_Port function
+ * -------------------
+ *
+ * Parameter:
+ * - @port: [const char*] - the port until where we iterate
+ *
+ * Parse the port range to verify it is between 1 and 65535, and there are
+ * no errors in it (alphabetical characters, etc)
+ */
 unsigned short int parse_port(const char* port)
 {
 	int port_range;
@@ -25,6 +46,7 @@ unsigned short int parse_port(const char* port)
 		exit(EXIT_FAILURE);
 	}
 
+	// Checking potential errors
 	for (size_t i = 0; i < strlen(port); i++) {
 		if (!isdigit(port[i])) {
 			fprintf(stderr, "Error: port number goes from 1 to 65535.");
@@ -32,8 +54,10 @@ unsigned short int parse_port(const char* port)
 		}
 	}
 
+	// Casting string to integer
 	port_range = atoi(port);
 
+	// Checking if it is 1-65535 range
 	if (port_range > MAX_PORT || port_range < MIN_PORT) {
 		fprintf(stderr, "Error: port number goes from 1 to 65535");
 		exit(EXIT_FAILURE);
@@ -42,6 +66,17 @@ unsigned short int parse_port(const char* port)
 	return ((unsigned short int)port_range);
 }
 
+/*
+ * -----------------
+ * Parse_IP function
+ * -----------------
+ *
+ * Parameter:
+ * - @ip: [char**] - string containing the IP address
+ *
+ * Parsing the IP address (v4 & v6) and store it in an array of strings
+ * One string is the IP, the other one is the version (v4 or v6)
+ */
 char	**parse_ip(const char *ip)
 {
 	struct sockaddr_in	sa;
@@ -58,6 +93,7 @@ char	**parse_ip(const char *ip)
 		exit(EXIT_FAILURE);
 	}
 
+	// IPv4
 	if (inet_pton(AF_INET, ip, &(sa.sin_addr)) == 1) {
 
 		ip_addr[0] = (char*)ip;
@@ -65,6 +101,7 @@ char	**parse_ip(const char *ip)
 
 		return (ip_addr);
 	}
+	// IPv6
 	else if (inet_pton(AF_INET6, ip, &(sa6.sin6_addr)) == 1)
 	{
 		ip_addr[0] = (char*)ip;
@@ -74,9 +111,8 @@ char	**parse_ip(const char *ip)
 	}
 	else
 	{
-		printf("yo4\n");
 		fprintf(stderr, "Error: [argv[1]] - IPv4 or IPv6 needed.\n\
-Example: 127.0.0.1 or aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa");
+Example: 127.0.0.1 or a1a1:a2a2:a3a3:a4a4:a5a5:a6a6:a7a7:a8a8");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -140,6 +176,13 @@ void	scanner(char **ip, unsigned short int port_range)
 	close(sockfd);
 }
 
+/*
+ * -----------------
+ * Starting function
+ * -----------------
+ *
+ * Display the header message at start of program.
+ */
 void present()
 {
 	printf("*----------------*\n");
@@ -150,9 +193,19 @@ void present()
 	sleep(1);
 }
 
+
+/*
+ * -------------
+ * Main function
+ * -------------
+ *
+ * Program that scans ports (1-port range) of an IP address.
+ * It prints out the open ports.
+ */
 int main(int argc, char *argv[])
 {
-	// Var that stocks ip address as a string, and the type of IP (v4 or v6)
+	// Variable that stocks ip address as a string,
+	// and the version of IP (v4 or v6)
 	char				**ip_addr;
 
 	// The number of port that will be scanned, from 1 to port_range
@@ -182,7 +235,7 @@ int main(int argc, char *argv[])
 		//----------------
 		printf("IP Address: %s\n", ip_addr[0]);
 		printf("IP Address type: %s\n", ip_addr[1]);
-		printf("Ports: 0-%hu\n", port_range);
+		printf("Ports: 1-%hu\n", port_range);
 		//----------------
 
 		// Scanner
